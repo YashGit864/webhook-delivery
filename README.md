@@ -90,13 +90,6 @@ Use a local test server to receive webhooks:
 node test-server.js
 ```
 
-Send a test webhook:
-```bash
-curl -X POST http://localhost:3000/api/webhook/YOUR_API_KEY \
-  -H "Content-Type: application/json" \
-  -d '{"event": "payment.success", "amount": 100}'
-```
-
 ## Deployment Note
 The worker process requires a persistent runtime. 
 Recommended: Railway, Render (paid), or a $5/mo VPS like DigitalOcean.
