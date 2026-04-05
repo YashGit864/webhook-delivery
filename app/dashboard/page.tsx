@@ -1,25 +1,30 @@
 'use client'
 
-import {useEffect, useState} from "react";
-import {useSession} from "next-auth/react";
-import {useRouter} from "next/navigation";
+import { useEffect, useState } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import Navbar from './components/Navbar'
 import WebhookUrlCard from './components/WebhookUrlCard'
 import EndpointConfig from './components/EndpointConfig'
 import EventsTable from './components/EventsTable'
-import {Endpoint, DeliveryAttempt, WebhookEvent} from './types';
+import { Endpoint, WebhookEvent } from './types';
 
 export default function DashboardPage() {
-    const {data: session, status} = useSession()
+    const { data: session, status } = useSession()
     const router = useRouter()
     const [endpoint, setEndpoint] = useState<Endpoint | null>(null)
     const [endpointUrl, setEndpointUrl] = useState('')
     const [saving, setSaving] = useState(false)
     const [events, setEvents] = useState<WebhookEvent[]>([])
-    const [loading, setLoading] = useState(false)
+    const [loading, setLoading] = useState(true)
 
+    async function fetchEvents() {
+        const res = await fetch('/api/events')
+        const data: WebhookEvent[] = await res.json()
+        setEvents(data)
+    }
 
-    async function fetchData (){
+    async function fetchData() {
         const [eventsRes, endpointRes] = await Promise.all([
             fetch('/api/events'),
             fetch('/api/endpoint')
@@ -28,33 +33,39 @@ export default function DashboardPage() {
         const endpointData: Endpoint = await endpointRes.json()
         setEvents(eventsData)
         setEndpoint(endpointData)
-        if(endpointData?.url) setEndpointUrl(endpointData.url)
+        if (endpointData?.url) setEndpointUrl(endpointData.url)
         setLoading(false)
     }
 
     useEffect(() => {
-        if(status == 'unauthenticated') return router.push('/login')
-    }, [status, router]);
+        if (status === 'unauthenticated') router.push('/login')
+    }, [status, router])
 
+    // initial load
     useEffect(() => {
-        if(status === 'authenticated') fetchData()
-    }, [status]);
+        if (status === 'authenticated') fetchData()
+    }, [status])
 
+    // auto refresh events every 5 seconds
+    useEffect(() => {
+        if (status !== 'authenticated') return
+        const interval = setInterval(fetchEvents, 5000)
+        return () => clearInterval(interval)
+    }, [status])
 
     async function saveEndpoint() {
         setSaving(true)
         const res = await fetch('/api/endpoint', {
             method: 'POST',
-            headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({url: endpointUrl})
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ url: endpointUrl })
         })
         const data: Endpoint = await res.json()
         setEndpoint(data)
         setSaving(false)
-
     }
 
-    if(status === 'loading' || loading) {
+    if (status === 'loading' || loading) {
         return (
             <div className="min-h-screen bg-gray-950 flex items-center justify-center">
                 <p className='text-gray-400'>Loading...</p>
