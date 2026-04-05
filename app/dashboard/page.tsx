@@ -8,6 +8,7 @@ import WebhookUrlCard from './components/WebhookUrlCard'
 import EndpointConfig from './components/EndpointConfig'
 import EventsTable from './components/EventsTable'
 import { Endpoint, WebhookEvent } from './types';
+import TestWebhook from './components/TestWebhook'
 
 export default function DashboardPage() {
     const { data: session, status } = useSession()
@@ -33,8 +34,11 @@ export default function DashboardPage() {
         const endpointData: Endpoint = await endpointRes.json()
         setEvents(eventsData)
         setEndpoint(endpointData)
-        if (endpointData?.url) setEndpointUrl(endpointData.url)
-        setLoading(false)
+        if (endpointData?.url) {
+            setEndpointUrl(endpointData.url)
+        } else {
+            setEndpointUrl(`${process.env.NEXT_PUBLIC_APP_URL}/api/test-receiver`)
+        }
     }
 
     useEffect(() => {
@@ -76,6 +80,14 @@ export default function DashboardPage() {
     return (
         <div className="min-h-screen bg-gray-950 text-white">
             <Navbar email={session?.user?.email ?? ''} />
+            {/* Worker notice */}
+            <div className="bg-yellow-400/10 border-b border-yellow-400/20 px-6 py-3 text-center">
+                <p className="text-yellow-400 text-sm">
+                    ⚠️ Webhook delivery requires the worker process to be running locally —{' '}
+                    <code className="bg-yellow-400/10 px-1.5 py-0.5 rounded text-xs">npm run worker</code>
+                    {' '}— Cloud deployment requires a paid persistent process host (Railway/Render).
+                </p>
+            </div>
             <div className="max-w-6xl mx-auto px-6 py-8 space-y-8">
                 <WebhookUrlCard apiKey={session?.user?.apiKey ?? ''} />
                 <EndpointConfig
@@ -85,6 +97,7 @@ export default function DashboardPage() {
                     onChange={setEndpointUrl}
                     onSave={saveEndpoint}
                 />
+                <TestWebhook apiKey={session?.user?.apiKey ?? ''} />
                 <EventsTable events={events} />
             </div>
         </div>

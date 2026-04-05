@@ -45,3 +45,7 @@ export interface EventRowProps {
 export interface EventsTableProps {
     events: WebhookEvent[]
 }
+
+export interface TestWebhookProps {
+    apiKey: string
+}
