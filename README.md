@@ -97,12 +97,10 @@ curl -X POST http://localhost:3000/api/webhook/YOUR_API_KEY \
   -d '{"event": "payment.success", "amount": 100}'
 ```
 
-## Deployment
-
-- **Next.js app** → [Vercel](https://vercel.com)
-- **Worker** → [Railway](https://railway.app) with start command `npm run worker`
-- **Redis** → [Upstash](https://upstash.com)
-- **Database** → [Neon](https://neon.tech)
+## Deployment Note
+The worker process requires a persistent runtime. 
+Recommended: Railway, Render (paid), or a $5/mo VPS like DigitalOcean.
+For local development, run `npm run worker` in a separate terminal.
 
 ## Database Schema
 ```
