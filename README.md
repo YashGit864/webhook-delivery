@@ -111,7 +111,3 @@ endpoints           — target delivery URL per user
 webhook_events      — all incoming webhooks with status
 delivery_attempts   — every delivery attempt with response status
 ```
-
-## License
-
-MIT
