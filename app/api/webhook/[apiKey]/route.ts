@@ -5,7 +5,9 @@ import {Queue} from "bullmq";
 const webhookQueue = new Queue('webhook-delivery', {
     connection: {
         host: process.env.REDIS_HOST!,
-        port: parseInt(process.env.REDIS_PORT!)
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        password: process.env.REDIS_PASSWORD,
+        tls: process.env.REDIS_TLS === 'true' ? {} : undefined
     }})
 
 export const POST = async (req: Request, {params}: {params: Promise<{apiKey: string}>}) => {
